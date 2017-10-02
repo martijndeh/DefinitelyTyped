@@ -10,10 +10,14 @@ namespace TestObjectUpdate {
 }
 
 namespace TestArrayUpdate {
-  update([], {
-    foo: {
-      bar: { $set: 'baz' }
-    }
+  update([
+      'foo',
+      'bar',
+      'baz',
+  ], {
+    0: {
+      $set: 'test',
+    },
   });
 }
 

@@ -4,37 +4,33 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 
-interface UpdateSpecCommand {
-    $set?: any;
-    $merge?: {};
-    $apply?(value: any): any;
-    [customCommand: string]: any;
+declare function update<T, C>(data: T, query: Query<T, C>): T;
+
+declare namespace update {
+    function newContext(): typeof update;
+
+    function extend<T>(command: string, handler: (param: any, old: T) => T): void;
 }
 
-interface UpdateSpecPath {
-    [pathPart: string]: UpdateSpec;
+interface IOperators<T> {
+  $toggle?: (keyof T)[];
+  $set?: T;
+  $unset?: string[];
+  $merge?: Partial<T>;
+  $apply?: (old: T) => T;
+  $push?: T;
+  $unshift?: T;
+  $splice?: [number, number][];
 }
 
-type UpdateSpec = UpdateSpecCommand | UpdateSpecPath;
-
-interface UpdateArraySpec extends UpdateSpecCommand {
-    $push?: any[];
-    $unshift?: any[];
-    $splice?: any[][];
-    [customCommand: string]: any;
+type Tree<T, C> = {
+    [K in keyof T]: IOperators<T[K]> | Partial<Tree<T[K], C>> | C;
 }
 
-type CommandHandler = (specValue: any, originalValue: any) => any;
-
-interface UpdateFunction {
-    (value: any[], spec: UpdateArraySpec): any[];
-    (value: {}, spec: UpdateSpec): any;
-    extend: (commandName: string, handler: CommandHandler) => any;
+interface Test<T, C> {
+    [index: number]: Partial<Tree<T, C>> | C;
 }
 
-interface Update extends UpdateFunction {
-    newContext(): UpdateFunction;
-}
+type Query<T, C> = Partial<IOperators<T> & Tree<T, C> & Test<T, C> & C>;
 
-declare const update: Update;
 export = update;
